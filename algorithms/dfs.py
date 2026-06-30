@@ -11,5 +11,36 @@ class DFS(BaseSearch):
         self.depth_limit = depth_limit
 
     def search(self, initial: State) -> SearchResult:
-        # TODO: implemente a DFS aqui
-        raise NotImplementedError("Implemente o método search na classe DFS.")
+        # DFS iterativa com limite de profundidade e controle de ciclos por ramo
+        nodes_expanded = 0
+        nodes_generated = 1
+        max_frontier_size = 1
+
+        # Pilha: (nó, conjunto de ancestrais no caminho atual)
+        stack = [(initial, frozenset())]
+
+        while stack:
+            max_frontier_size = max(max_frontier_size, len(stack))
+            node, ancestors = stack.pop()
+
+            if node.is_goal:
+                return SearchResult(
+                    solution=node,
+                    nodes_expanded=nodes_expanded,
+                    nodes_generated=nodes_generated,
+                    max_frontier_size=max_frontier_size,
+                    depth=node.cost,
+                )
+
+            if node.cost >= self.depth_limit:
+                continue
+
+            nodes_expanded += 1
+            path_set = ancestors | {node.tiles}
+
+            for child in reversed(node.neighbors()):
+                nodes_generated += 1
+                if child.tiles not in path_set:
+                    stack.append((child, path_set))
+
+        return SearchResult(solution=None, nodes_expanded=nodes_expanded, nodes_generated=nodes_generated, max_frontier_size=max_frontier_size)
